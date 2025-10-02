@@ -1,0 +1,9 @@
+- [x] Update backend/tests/user.model.test.js to use direct password values instead of environment variables
+- [x] Remove dotenv require from the test file
+- [x] Replace process.env.TEST_PASSWORD_1 with 'testPassword1'
+- [x] Replace process.env.TEST_PASSWORD_2 with 'testPassword2'
+- [x] Remove debug console.log line
+- [x] Run tests to verify the fix
+- [x] Remove .env.test from .gitignore to commit it to repository
+- [x] Add JWT_SECRET to .env.test for JWT token verification in tests
+- [x] Ensure all environment variables are available in CI
