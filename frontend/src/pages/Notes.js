@@ -1,47 +1,166 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './Notes.css'; // Create this CSS file for additional styling
 
 function Notes() {
+  const navigate = useNavigate();
   const [note, setNote] = useState('');
   const [notes, setNotes] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleAdd = (e) => {
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('token');
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  };
+
+  const handleTokenExpiration = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch('/api/notes', {
+        headers: getAuthHeaders()
+      });
+      if (response.status === 401) {
+        handleTokenExpiration();
+        return;
+      }
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.map(note => ({ ...note, id: note._id, createdAt: new Date(note.createdAt) })));
+      } else {
+        setError('Failed to fetch notes');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const handleAdd = async (e) => {
     e.preventDefault();
-    if (!note) {
+    if (!note.trim()) {
       setError('Note cannot be empty');
       return;
     }
-    setNotes([...notes, note]);
-    setNote('');
-    setError('');
+    try {
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ text: note.trim() })
+      });
+      if (response.status === 401) {
+        handleTokenExpiration();
+        return;
+      }
+      if (response.ok) {
+        setNote('');
+        setError('');
+        fetchNotes(); // Refresh notes list
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Failed to add note');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    }
   };
 
-  const handleDelete = (idx) => {
-    setNotes(notes.filter((_, i) => i !== idx));
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (response.status === 401) {
+        handleTokenExpiration();
+        return;
+      }
+      if (response.ok) {
+        fetchNotes(); // Refresh notes list
+      } else {
+        setError('Failed to delete note');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    }
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: 'auto' }}>
-      <h2>Notes</h2>
-      <form onSubmit={handleAdd}>
-        <input
-          type="text"
-          placeholder="Add a note"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          style={{ width: '100%', marginBottom: 8 }}
-        />
-        {error && <div style={{ color: 'red', marginBottom: 8 }}>{error}</div>}
-        <button type="submit" style={{ width: '100%' }}>Add Note</button>
+    <div className="notes-container">
+      <div className="notes-header">
+        <h2 className="notes-title">📝 My Notes</h2>
+        <p className="notes-subtitle">Keep track of your thoughts</p>
+      </div>
+
+      <form onSubmit={handleAdd} className="notes-form">
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder="What's on your mind?"
+            value={note}
+            onChange={e => {
+              setNote(e.target.value);
+              setError('');
+            }}
+            className={`notes-input ${error ? 'error' : ''}`}
+          />
+          <button type="submit" className="add-button">
+            <span className="button-icon">+</span>
+            Add Note
+          </button>
+        </div>
+        {error && <div className="error-message">{error}</div>}
       </form>
-      <ul style={{ padding: 0 }}>
-        {notes.map((n, idx) => (
-          <li key={idx} style={{ listStyle: 'none', margin: '8px 0', background: '#f9f9f9', padding: '8px', borderRadius: 4 }}>
-            {n}
-            <button onClick={() => handleDelete(idx)} style={{ float: 'right' }}>Delete</button>
-          </li>
-        ))}
-      </ul>
+
+      <div className="notes-list-container">
+        {loading ? (
+          <div className="loading-state">
+            <p>Loading notes...</p>
+          </div>
+        ) : notes.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📄</div>
+            <p>No notes yet. Add your first note above!</p>
+          </div>
+        ) : (
+          <>
+            <div className="notes-stats">
+              <span>{notes.length} note{notes.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="notes-list">
+              {notes.map((note) => (
+                <div key={note.id} className="note-card">
+                  <div className="note-content">
+                    <p className="note-text">{note.text}</p>
+                    <small className="note-time">
+                      {note.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </small>
+                  </div>
+                  <button 
+                    onClick={() => handleDelete(note.id)} 
+                    className="delete-button"
+                    aria-label="Delete note"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

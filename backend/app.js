@@ -125,7 +125,7 @@ app.post('/auth/login', customLoginLimiter, async (req, res) => {
 });
 
 // ----- Notes endpoints -----
-app.post('/notes', authMiddleware, async (req, res) => {
+app.post('/api/notes', authMiddleware, async (req, res) => {
   const { text } = req.body;
   if (!text) {
     return res.status(400).json({ error: 'Note text required' });
@@ -140,7 +140,7 @@ app.post('/notes', authMiddleware, async (req, res) => {
   }
 });
 
-app.get('/notes', authMiddleware, async (req, res) => {
+app.get('/api/notes', authMiddleware, async (req, res) => {
   try {
     const notes = await Note.find({ user: req.user.userId });
     res.json(notes);
@@ -149,7 +149,7 @@ app.get('/notes', authMiddleware, async (req, res) => {
   }
 });
 
-app.delete('/notes/:id', authMiddleware, async (req, res) => {
+app.delete('/api/notes/:id', authMiddleware, async (req, res) => {
   const noteId = req.params.id;
   if (!mongoose.Types.ObjectId.isValid(noteId)) {
     return res.status(400).json({ error: 'Invalid note ID' });
@@ -175,6 +175,7 @@ app.delete('/notes/:id', authMiddleware, async (req, res) => {
 const startServer = async () => {
   try {
     const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/notesapp';
+
     await mongoose.connect(mongoUri);
     console.log('✅ MongoDB connected successfully');
     app.listen(PORT, () => {

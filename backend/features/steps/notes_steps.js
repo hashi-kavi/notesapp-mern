@@ -32,9 +32,9 @@ Given('I am logged in as {string}', async function (username) {
 When('I add a note with text {string}', async function (noteText) {
   console.log('Adding note:', noteText);
   response = await request(app)
-    .post('/notes')  // Removed /api prefix
+    .post('/api/notes')
     .set('Authorization', `Bearer ${token}`)
-    .send({ 
+    .send({
       text: noteText  // Your endpoint uses 'text' not 'content'
     });
   console.log('Note added, response:', response.status, response.body);
@@ -43,7 +43,7 @@ When('I add a note with text {string}', async function (noteText) {
 Then('the note should be saved and visible in my notes list', async function () {
   console.log('Checking notes list...');
   const res = await request(app)
-    .get('/notes')  // Removed /api prefix
+    .get('/api/notes')
     .set('Authorization', `Bearer ${token}`);
   
   console.log('Notes retrieved:', res.body.length, 'notes found');

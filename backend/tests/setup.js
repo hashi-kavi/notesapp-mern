@@ -1,34 +1,29 @@
-require('dotenv').config({ path: './.env.test' });
 const mongoose = require('mongoose');
-const app = require('../app');
+let mongoServer;
+let isConnected = false;
 
-// Use a DIFFERENT database for tests to avoid conflicts
-const TEST_DB_URI = process.env.TEST_MONGO_URI || 'mongodb://localhost:27017/notesapp-test';
+const isCI = process.env.CI === 'true' || process.env.GITHUB_ACTIONS === 'true';
+const mongoUri = isCI
+  ? 'mongodb://localhost:27017/testdb' // Use CI MongoDB service
+  : 'mongodb://localhost:27017/notesapp-test'; // Use local MongoDB
 
 beforeAll(async () => {
-  // Close any existing connection first
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
+  if (!isConnected) {
+    if (isCI) {
+      await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+    } else {
+      await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+    }
+    isConnected = true;
   }
-
-  // Connect to test database with increased timeout
-  await mongoose.connect(TEST_DB_URI, {
-    serverSelectionTimeoutMS: 10000, // 10 seconds
-    socketTimeoutMS: 10000,
-  });
-  console.log('✅ Connected to TEST database:', TEST_DB_URI);
-}, 15000); // Increase Jest timeout for this hook
+}, 15000);
 
 afterAll(async () => {
-  // Clean up intervals from app
-  if (app.cleanupIntervals) {
-    app.cleanupIntervals();
-  }
-  
-  // Clean up and close connection
   await mongoose.connection.dropDatabase();
   await mongoose.connection.close();
-  console.log('✅ Test database closed');
+  if (mongoServer && typeof mongoServer.stop === 'function') {
+    await mongoServer.stop();
+  }
 });
 
 afterEach(async () => {
