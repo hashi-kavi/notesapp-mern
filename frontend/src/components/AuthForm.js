@@ -49,6 +49,7 @@ function AuthForm({
         setError(data.message || errorMessage);
       }
     } catch (err) {
+      console.error('Network error:', err);
       setError('Network error. Please try again.');
     } finally {
       setIsLoading(false);
@@ -116,6 +117,7 @@ function AuthForm({
     </div>
   );
 }
+
 // Add PropTypes validation
 AuthForm.propTypes = {
   title: PropTypes.string.isRequired,
