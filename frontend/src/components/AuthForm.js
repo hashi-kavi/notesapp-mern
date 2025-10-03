@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import '../pages/Auth.css';
 
 function AuthForm({
@@ -29,10 +30,8 @@ function AuthForm({
       setError('All fields are required');
       return;
     }
-
     setIsLoading(true);
     setError('');
-
     try {
       const response = await fetch(apiEndpoint, {
         method: 'POST',
@@ -41,7 +40,6 @@ function AuthForm({
         },
         body: JSON.stringify({ username, password }),
       });
-
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('token', data.token);
@@ -64,7 +62,6 @@ function AuthForm({
           <h2 className="auth-title">{title}</h2>
           <p className="auth-subtitle">{subtitle}</p>
         </div>
-
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="input-group">
             <label htmlFor={usernameId} className="input-label">Username</label>
@@ -81,7 +78,6 @@ function AuthForm({
               disabled={isLoading}
             />
           </div>
-
           <div className="input-group">
             <label htmlFor={passwordId} className="input-label">Password</label>
             <input
@@ -97,9 +93,7 @@ function AuthForm({
               disabled={isLoading}
             />
           </div>
-
           {error && <div className="error-message">{error}</div>}
-
           <button
             type="submit"
             className="auth-button"
@@ -115,7 +109,6 @@ function AuthForm({
             )}
           </button>
         </form>
-
         <div className="auth-footer">
           <p>{linkText} <a href={linkHref} className="auth-link">{linkAnchorText}</a></p>
         </div>
@@ -123,5 +116,22 @@ function AuthForm({
     </div>
   );
 }
-
+/*
+// Add PropTypes validation
+AuthForm.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  buttonText: PropTypes.string.isRequired,
+  loadingText: PropTypes.string.isRequired,
+  linkText: PropTypes.string.isRequired,
+  linkHref: PropTypes.string.isRequired,
+  linkAnchorText: PropTypes.string.isRequired,
+  apiEndpoint: PropTypes.string.isRequired,
+  usernamePlaceholder: PropTypes.string.isRequired,
+  passwordPlaceholder: PropTypes.string.isRequired,
+  usernameId: PropTypes.string.isRequired,
+  passwordId: PropTypes.string.isRequired,
+  errorMessage: PropTypes.string.isRequired
+};
+*/
 export default AuthForm;
