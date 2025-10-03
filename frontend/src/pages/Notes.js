@@ -38,6 +38,7 @@ function Notes() {
         setError('Failed to fetch notes');
       }
     } catch (err) {
+      console.error('Fetch notes error:', err);
       setError('Network error. Please try again.');
     } finally {
       setLoading(false);
@@ -73,6 +74,7 @@ function Notes() {
         setError(data.error || 'Failed to add note');
       }
     } catch (err) {
+      console.error('Add note error:', err);
       setError('Network error. Please try again.');
     }
   };
@@ -93,6 +95,7 @@ function Notes() {
         setError('Failed to delete note');
       }
     } catch (err) {
+      console.error('Delete note error:', err);
       setError('Network error. Please try again.');
     }
   };
