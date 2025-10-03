@@ -1,4 +1,4 @@
-﻿// server.js - Production server entry point
+// server.js - Production server entry point
 const app = require('./app');
 const mongoose = require('mongoose');
 
@@ -12,8 +12,8 @@ async function startServer() {
     console.log('✅ MongoDB connected successfully');
 
     app.listen(PORT, () => {
-      console.log(\🚀 Backend server is running on http://localhost:\\);
-      console.log(\📝 API endpoints available at http://localhost:\\);
+      console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+      console.log(`📝 API endpoints available at http://localhost:${PORT}`);
     });
   } catch (err) {
     console.error('❌ MongoDB connection error:', err);
