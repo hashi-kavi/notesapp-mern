@@ -9,11 +9,11 @@ const mongoUri = isCI
 
 beforeAll(async () => {
   if (!isConnected) {
-    if (isCI) {
-      await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    } else {
-      await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    }
+    // Remove the duplicate conditional - both cases use the same connection options
+    await mongoose.connect(mongoUri, { 
+      useNewUrlParser: true, 
+      useUnifiedTopology: true 
+    });
     isConnected = true;
   }
 }, 15000);
