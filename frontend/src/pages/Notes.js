@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Notes.css'; // Create this CSS file for additional styling
+import './Notes.css';
 
 function Notes() {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ function Notes() {
       if (response.ok) {
         setNote('');
         setError('');
-        fetchNotes(); // Refresh notes list
+        fetchNotes();
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to add note');
@@ -88,7 +88,7 @@ function Notes() {
         return;
       }
       if (response.ok) {
-        fetchNotes(); // Refresh notes list
+        fetchNotes();
       } else {
         setError('Failed to delete note');
       }
@@ -97,13 +97,60 @@ function Notes() {
     }
   };
 
+  // Extract nested ternary into independent statement
+  const renderNotesContent = () => {
+    if (loading) {
+      return (
+        <div className="loading-state">
+          <p>Loading notes...</p>
+        </div>
+      );
+    }
+    
+    if (notes.length === 0) {
+      return (
+        <div className="empty-state">
+          <div className="empty-icon">📄</div>
+          <p>No notes yet. Add your first note above!</p>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="notes-stats">
+          <span>{notes.length} note{notes.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div className="notes-list">
+          {notes.map((note) => (
+            <div key={note.id} className="note-card">
+              <div className="note-content">
+                <p className="note-text">{note.text}</p>
+                <small className="note-time">
+                  {note.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </small>
+              </div>
+              <button 
+                onClick={() => handleDelete(note.id)} 
+                className="delete-button"
+                aria-label="Delete note"
+              >
+                🗑️
+              </button>
+            </div>
+          ))}
+        </div>
+      </>
+    );
+  };
+
   return (
     <div className="notes-container">
       <div className="notes-header">
         <h2 className="notes-title">📝 My Notes</h2>
         <p className="notes-subtitle">Keep track of your thoughts</p>
       </div>
-
+      
       <form onSubmit={handleAdd} className="notes-form">
         <div className="input-group">
           <input
@@ -125,41 +172,7 @@ function Notes() {
       </form>
 
       <div className="notes-list-container">
-        {loading ? (
-          <div className="loading-state">
-            <p>Loading notes...</p>
-          </div>
-        ) : notes.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">📄</div>
-            <p>No notes yet. Add your first note above!</p>
-          </div>
-        ) : (
-          <>
-            <div className="notes-stats">
-              <span>{notes.length} note{notes.length !== 1 ? 's' : ''}</span>
-            </div>
-            <div className="notes-list">
-              {notes.map((note) => (
-                <div key={note.id} className="note-card">
-                  <div className="note-content">
-                    <p className="note-text">{note.text}</p>
-                    <small className="note-time">
-                      {note.createdAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </small>
-                  </div>
-                  <button 
-                    onClick={() => handleDelete(note.id)} 
-                    className="delete-button"
-                    aria-label="Delete note"
-                  >
-                    🗑️
-                  </button>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+        {renderNotesContent()}
       </div>
     </div>
   );
