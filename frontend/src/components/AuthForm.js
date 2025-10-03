@@ -116,7 +116,6 @@ function AuthForm({
     </div>
   );
 }
-/*
 // Add PropTypes validation
 AuthForm.propTypes = {
   title: PropTypes.string.isRequired,
@@ -133,5 +132,5 @@ AuthForm.propTypes = {
   passwordId: PropTypes.string.isRequired,
   errorMessage: PropTypes.string.isRequired
 };
-*/
+
 export default AuthForm;
